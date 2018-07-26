@@ -16,7 +16,7 @@ use crdts::{CmRDT, Actor};
 use log::{TaggedOp, LogReplicable};
 
 #[derive(Debug, PartialEq, Eq, Clone)]
-pub struct Auth {
+pub struct GitRemoteAuth {
     user: String,
     pass: String
 }
@@ -27,7 +27,7 @@ pub struct Log<A: Actor, C: Debug + CmRDT>
     actor: A,
     name: String,
     url: String,
-    auth: Option<Auth>,
+    auth: Option<GitRemoteAuth>,
     repo: git2::Repository,
     phantom_crdt: PhantomData<C>
 }
@@ -324,7 +324,7 @@ impl<A: Actor, C: Debug + CmRDT> Log<A, C>
             actor: actor,
             name: name,
             url: url,
-            auth: Some(Auth { user, pass }),
+            auth: Some(GitRemoteAuth { user, pass }),
             repo: repo,
             phantom_crdt: PhantomData
         }
@@ -345,7 +345,7 @@ impl<A: Actor, C: Debug + CmRDT> Log<A, C>
         let mut cbs = git2::RemoteCallbacks::new();
         cbs.credentials(move |_, _, _| {
             match self.auth {
-                Some(Auth {ref user, ref pass} ) =>
+                Some(GitRemoteAuth {ref user, ref pass} ) =>
                     git2::Cred::userpass_plaintext(user, pass),
                 None => {
                     panic!("This should never be called!");
